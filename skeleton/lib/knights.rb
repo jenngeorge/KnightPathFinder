@@ -7,21 +7,23 @@ class KnightPathFinder
   def initialize(position=[0,0])
     @position = position
     @move_tree = nil
-    @visited_positions = [position]
+    @visited_positions = []
   end
 
   def build_move_tree(target_value)
-    queue = [@position]
-    new_root = PolyTreeNode.new(@position)
+    queue = [PolyTreeNode.new(@position)]
+
     until queue.empty?
       last = queue.shift
-      return new_root.add_child(PolyTreeNode.new(last)) if last == target_value
-      new_root = PolyTreeNode.new(last)
-      new_move_positions(last).each do |move|
-        queue << move
-        new_root.add_child(PolyTreeNode.new(move))
+      current_position = last.value
+
+      new_move_positions(last.value).each do |move|
+        new_node = PolyTreeNode.new(move)
+        queue << new_node
+        last.add_child(new_node)
       end
     end
+    return last
   end
 
   def valid_moves(pos)
@@ -36,8 +38,11 @@ class KnightPathFinder
   end
 
   def new_move_positions(pos)
-    new_positions = valid_moves(pos).reject { |move| @visited_positions.include?(move) }
-    @visited_positions << new_positions
+    new_positions = []
+    valid_moves(pos).each do |move|
+      new_positions << move unless @visited_positions.include?(move)
+    end
+    @visited_positions += new_positions
     new_positions
   end
 
